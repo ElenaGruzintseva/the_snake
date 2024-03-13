@@ -41,21 +41,49 @@ pygame.display.set_caption('Змейка')
 # Настройка времени:
 clock = pygame.time.Clock()
 
+class GameObject:
 
-# Тут опишите все классы игры.
-...
+    def __init__(self):
+        self.position = ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))
+
+    def draw(self):
+        """"Метод будет определен в потомках"""
+        raise NotImplementedError(f'Определите Draw {type(self).__name__}')
+
+class Apple(GameObject):
+
+    def __init__(self, position, body_color=APPLE_COLOR):
+        super().__init__()
+        self.position = position
+        self.body_color = body_color
+        self.position = self.randomize_position()
+
+    def randomize_position(self):
+        self.position = (
+            randint(0, GRID_WIDTH) * GRID_SIZE - GRID_SIZE,
+            randint(0, GRID_HEIGHT) * GRID_SIZE - GRID_SIZE
+        )
+
+    def draw(self, surface):
+        rect = pygame.Rect(
+            (self.position[0], self.position[1]),
+            (GRID_SIZE, GRID_SIZE)
+        )
+        pygame.draw.rect(surface, self.body_color, rect)
+        pygame.draw.rect(surface, BORDER_COLOR, rect, 1)
 
 
 def main():
-    # Тут нужно создать экземпляры классов.
-    ...
+    apple = Apple()
 
-    # while True:
-    #     clock.tick(SPEED)
+    while True:
+        clock.tick(SPEED)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
 
-        # Тут опишите основную логику игры.
-        # ...
-
+        apple.draw(screen)
+        pygame.display.update()
 
 if __name__ == '__main__':
     main()
