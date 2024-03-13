@@ -44,6 +44,7 @@ clock = pygame.time.Clock()
 
 class GameObject:
     """Creating an object class"""
+
     def __init__(self, body_color=(0, 0, 0)):
         self.position = ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))
         self.body_color = body_color
@@ -55,6 +56,7 @@ class GameObject:
 
 class Apple(GameObject):
     """Creating Apple class"""
+
     def __init__(self, body_color=APPLE_COLOR):
         super().__init__(body_color)
         self.body_color = body_color
@@ -68,7 +70,7 @@ class Apple(GameObject):
         )
 
     def draw(self, surface):
-        """"Drawing apple"""
+        """Drawing apple"""
         rect = pygame.Rect(
             (self.position[0], self.position[1]),
             (GRID_SIZE, GRID_SIZE)
@@ -79,6 +81,7 @@ class Apple(GameObject):
 
 class Snake(GameObject):
     """Creating Snake class"""
+
     def __init__(self, body_color=SNAKE_COLOR, length=1, direction=RIGHT,
                  next_direction=None, last=None):
         super().__init__(body_color)
