@@ -30,7 +30,7 @@ APPLE_COLOR = (255, 0, 0)
 SNAKE_COLOR = (0, 255, 0)
 
 # Скорость движения змейки:
-SPEED = 20
+SPEED = 10
 
 # Настройка игрового окна:
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
@@ -41,29 +41,39 @@ pygame.display.set_caption('Змейка')
 # Настройка времени:
 clock = pygame.time.Clock()
 
-class GameObject:
 
-    def __init__(self):
+class GameObject:
+    """Creating an object class"""
+
+    def __init__(self, body_color=(0, 0, 0)):
         self.position = ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))
+        self.body_color = body_color
 
     def draw(self):
-        """"Метод будет определен в потомках"""
+        """The method will be defined in the descendants"""
+
         raise NotImplementedError(f'Определите Draw {type(self).__name__}')
 
+
 class Apple(GameObject):
+    """Creating Apple class"""
 
     def __init__(self, body_color=APPLE_COLOR):
-        super().__init__()
+        super().__init__(body_color)
         self.body_color = body_color
         self.position = self.randomize_position()
 
     def randomize_position(self):
+        """Determine the random position of the apple"""
+
         return (
             randint(0, GRID_WIDTH) * GRID_SIZE - GRID_SIZE,
             randint(0, GRID_HEIGHT) * GRID_SIZE - GRID_SIZE
         )
 
     def draw(self, surface):
+        """"Drawing apple"""
+
         rect = pygame.Rect(
             (self.position[0], self.position[1]),
             (GRID_SIZE, GRID_SIZE)
@@ -71,10 +81,13 @@ class Apple(GameObject):
         pygame.draw.rect(surface, self.body_color, rect)
         pygame.draw.rect(surface, BORDER_COLOR, rect, 1)
 
-class Snake(GameObject):
 
-    def __init__(self, body_color=SNAKE_COLOR, length=1, direction=RIGHT, next_direction=None, last=None):
-        super().__init__()
+class Snake(GameObject):
+    """Creating Snake class"""
+
+    def __init__(self, body_color=SNAKE_COLOR, length=1, direction=RIGHT,
+                 next_direction=None, last=None):
+        super().__init__(body_color)
         self.body_color = body_color
         self.length = length
         self.direction = direction
@@ -84,42 +97,28 @@ class Snake(GameObject):
         self.last = last
 
     def update_direction(self):
+        """Updating the snake's direction of movement"""
+
         if self.next_direction:
             self.direction = self.next_direction
             self.next_direction = None
 
     def move(self):
+        """Processing the movement of the snake"""
+
         head_position = list(self.get_head_position())
-        if self.direction == RIGHT:
-            head_position = [head_position[0] + GRID_SIZE, head_position[1]]
-            if head_position[0] > SCREEN_WIDTH:
-                head_position[0] -= SCREEN_WIDTH
-        elif self.direction == LEFT:
-            head_position = [head_position[0] - GRID_SIZE, head_position[1]]
-            if head_position[0] < 0:
-                head_position[0] += SCREEN_WIDTH
-        elif self.direction == UP:
-            head_position = [head_position[0], head_position[1] - GRID_SIZE]
-            if head_position[1] < 0:
-                head_position[1] += SCREEN_HEIGHT
-        elif self.direction == DOWN:
-            head_position = [head_position[0], head_position[1] + GRID_SIZE]
-            if head_position[1] > SCREEN_HEIGHT:
-                head_position[1] -= SCREEN_HEIGHT
-
-        head_position = tuple(head_position)
-
-        if head_position in self.positions[2:]:
-            self.reset()
-            return
-        else:
-            self.positions.insert(0, head_position)
+        head_position = (
+            ((head_position[0] + GRID_SIZE * self.direction[0]) % SCREEN_WIDTH),
+            ((head_position[1] + GRID_SIZE * self.direction[1]) % SCREEN_HEIGHT)
+        )
+        self.positions.insert(0, head_position)
 
         if len(self.positions) > self.length:
-            self.positions.pop()
-
+            self.last = self.positions.pop()
 
     def draw(self, surface):
+        """Drawing snake"""
+
         for position in self.positions[:-1]:
             rect = (
                 pygame.Rect((position[0], position[1]), (GRID_SIZE, GRID_SIZE))
@@ -139,15 +138,22 @@ class Snake(GameObject):
             pygame.draw.rect(surface, BOARD_BACKGROUND_COLOR, last_rect)
 
     def get_head_position(self):
+        """Get head position of snake"""
+
         return self.positions[0]
-    
+
     def reset(self):
+        """Reset the snake to the initial state"""
+
         self.length = 1
         self.positions = ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))
         self.direction = choice(UP, DOWN, RIGHT, LEFT)
         screen.fill(BOARD_BACKGROUND_COLOR)
 
+
 def handle_keys(game_object):
+    """Processing keystrokes"""
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -164,6 +170,8 @@ def handle_keys(game_object):
 
 
 def main():
+    """The basic logic of the game"""
+
     snake = Snake()
     apple = Apple()
 
@@ -182,6 +190,6 @@ def main():
         apple.draw(screen)
         pygame.display.update()
 
+
 if __name__ == '__main__':
     main()
-
