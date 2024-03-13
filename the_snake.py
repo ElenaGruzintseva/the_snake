@@ -108,8 +108,10 @@ class Snake(GameObject):
 
         head_position = list(self.get_head_position())
         head_position = (
-            ((head_position[0] + GRID_SIZE * self.direction[0]) % SCREEN_WIDTH),
-            ((head_position[1] + GRID_SIZE * self.direction[1]) % SCREEN_HEIGHT)
+            ((head_position[0] + GRID_SIZE * self.direction[0]) %
+             SCREEN_WIDTH),
+            ((head_position[1] + GRID_SIZE * self.direction[1]) %
+             SCREEN_HEIGHT)
         )
         self.positions.insert(0, head_position)
 
