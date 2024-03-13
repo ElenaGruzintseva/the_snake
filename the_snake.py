@@ -52,14 +52,14 @@ class GameObject:
 
 class Apple(GameObject):
 
-    def __init__(self, position, body_color=APPLE_COLOR):
+    def __init__(self, body_color=APPLE_COLOR):
         super().__init__()
-        self.position = position
         self.body_color = body_color
         self.position = self.randomize_position()
 
     def randomize_position(self):
-        self.position = (
+
+        return (
             randint(0, GRID_WIDTH) * GRID_SIZE - GRID_SIZE,
             randint(0, GRID_HEIGHT) * GRID_SIZE - GRID_SIZE
         )
