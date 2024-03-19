@@ -50,9 +50,12 @@ class GameObject:
         """Defined in the descendants"""
         raise NotImplementedError(f'Определите Draw {type(self).__name__}')
 
-    def draw_rect(self, i):
+    def draw_rect(self, position, body_color=(0, 0, 0)):
         """Drawing rect"""
-        self.rect = pg.Rect((i), (GRID_SIZE, GRID_SIZE))
+        self.rect = pg.Rect((position), (GRID_SIZE, GRID_SIZE))
+        pg.draw.rect(screen, body_color, self.rect)
+        if self.body_color != BOARD_BACKGROUND_COLOR:
+            pg.draw.rect(screen, BORDER_COLOR, self.rect, 1)
 
 
 class Apple(GameObject):
@@ -61,24 +64,22 @@ class Apple(GameObject):
     def __init__(self, snake=None, body_color=APPLE_COLOR):
         super().__init__(body_color)
         self.body_color = body_color
-        if snake is not None:
-            self.randomize_position(snake)
 
     def randomize_position(self, snake):
         """Determine the random position of the apple"""
-        self.position = (
-            randint(1, GRID_WIDTH) * GRID_SIZE - GRID_SIZE,
-            randint(1, GRID_HEIGHT) * GRID_SIZE - GRID_SIZE
-        )
-        for i in snake.positions:
-            if self.position == i:
-                self.randomize_position(snake)
+        while True:
+            self.position = (
+                randint(1, GRID_WIDTH) * GRID_SIZE - GRID_SIZE,
+                randint(1, GRID_HEIGHT) * GRID_SIZE - GRID_SIZE
+            )
+            for position in snake.positions:
+                if self.position != position:
+                    break
+            break
 
     def draw(self):
         """Drawing apple"""
-        self.draw_rect(self.position)
-        pg.draw.rect(screen, self.body_color, self.rect)
-        pg.draw.rect(screen, BORDER_COLOR, self.rect, 1)
+        self.draw_rect(self.position, self.body_color)
 
 
 class Snake(GameObject):
@@ -98,16 +99,14 @@ class Snake(GameObject):
 
     def move(self):
         """Processing the movement of the snake"""
-        head_position = self.get_head_position()
-        head_x = head_position[0]
-        head_y = head_position[1]
-        direct_x = self.direction[0]
-        direct_y = self.direction[1]
-        head_position = (
+        head_x, head_y = self.get_head_position()
+        direct_x, direct_y = self.direction
+
+        self.position = (
             ((head_x + GRID_SIZE * direct_x) % SCREEN_WIDTH),
             ((head_y + GRID_SIZE * direct_y) % SCREEN_HEIGHT)
         )
-        self.positions.insert(0, head_position)
+        self.positions.insert(0, self.position)
 
         if len(self.positions) > self.length:
             self.last = self.positions.pop()
@@ -116,12 +115,10 @@ class Snake(GameObject):
 
     def draw(self):
         """Drawing snake"""
-        self.draw_rect(self.positions[0])
-        pg.draw.rect(screen, self.body_color, self.rect)
-        pg.draw.rect(screen, BORDER_COLOR, self.rect, 1)
+        self.draw_rect(self.positions[0], self.body_color)
 
         if self.last:
-            self.draw_rect(self.last)
+            self.draw_rect(self.last, self.body_color)
             pg.draw.rect(screen, BOARD_BACKGROUND_COLOR, self.rect)
 
     def get_head_position(self):
@@ -131,7 +128,6 @@ class Snake(GameObject):
     def reset(self):
         """Reset the snake to the initial state"""
         self.length = 1
-        self.position = ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))
         self.positions = [self.position]
         self.direction = choice([UP, DOWN, RIGHT, LEFT])
 
@@ -140,7 +136,7 @@ def handle_keys(game_object):
     """Processing keystrokes"""
     for event in pg.event.get():
         if event.type == pg.QUIT:
-            pg.quit()
+            pg.QUIT()
             raise SystemExit
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_UP and game_object.direction != DOWN:
@@ -166,13 +162,10 @@ def main():
         snake.update_direction()
         snake.move()
 
-        for i in snake.positions[1:]:
-            if i == snake.get_head_position():
-                screen.fill(BOARD_BACKGROUND_COLOR)
-                snake.positions.clear()
-                snake.reset()
-                apple.randomize_position(snake)
-                break
+        if snake.get_head_position() in snake.positions[1:]:
+            screen.fill(BOARD_BACKGROUND_COLOR)
+            snake.reset()
+            apple.randomize_position(snake)
 
         if snake.get_head_position() == apple.position:
             snake.length += 1
