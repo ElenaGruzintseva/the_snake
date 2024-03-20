@@ -72,10 +72,8 @@ class Apple(GameObject):
                 randint(1, GRID_WIDTH) * GRID_SIZE - GRID_SIZE,
                 randint(1, GRID_HEIGHT) * GRID_SIZE - GRID_SIZE
             )
-            for position in snake.positions:
-                if self.position != position:
-                    break
-            break
+            if self.position not in snake.positions:
+                break
 
     def draw(self):
         """Drawing apple"""
@@ -103,8 +101,8 @@ class Snake(GameObject):
         direct_x, direct_y = self.direction
 
         self.position = (
-            ((head_x + GRID_SIZE * direct_x) % SCREEN_WIDTH),
-            ((head_y + GRID_SIZE * direct_y) % SCREEN_HEIGHT)
+            (head_x % SCREEN_WIDTH + GRID_SIZE * direct_x),
+            (head_y % SCREEN_HEIGHT + GRID_SIZE * direct_y)
         )
         self.positions.insert(0, self.position)
 
